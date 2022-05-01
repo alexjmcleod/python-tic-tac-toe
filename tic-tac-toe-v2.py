@@ -17,6 +17,9 @@ class Player:
         """ Returns the players current set of tiles """
         return self._tiles
 
+    def clear_tiles(self):
+        """ Clears the players tiles at the start of a new game """
+
 # Create players
 player_1 = Player("Player 1", "X")
 player_2 = Player("Player 2", "O")
@@ -54,11 +57,11 @@ def draw_board():
 
 def is_win(player):
     """ Checks whether a players current tiles match any of the winning combinations """
-    if len(player._tiles) < 3:
+    if len(player.get_tiles) < 3:
         return False # Not a win if the player doesn't have at least 3 tiles
     for combo in winning_combinations:
         for tile in combo:
-            if tile not in player._tiles:
+            if tile not in player.get_tiles:
                 return False # Not a win if the player doesn't have all 3 of the tiles in this combo
 
         # It's a win if the player has all 3 of the tiles from this combo in their tiles
@@ -81,7 +84,7 @@ def player_turn(player):
     if move not in current_board:
         print("Please choose a valid tile.")
         move = int(input(player._name + ", pick a tile: "))
-    player._tiles.append(move) # Add move to the current players tiles
+    player.add_tile(move) # Add move to the current players tiles
     current_board[move-1] = player._character # Mark the board with the current players character
     print("\n")
     return is_win(player)
@@ -107,8 +110,8 @@ while new_game != "y" and new_game != "n":
 
 if new_game == "y":
     current_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    player_1._tiles = []
-    player_2._tiles = []
+    player_1.clear_tiles()
+    player_2.clear_tiles()
     new_game = ""
     winner = False
     print("\n" * 3)

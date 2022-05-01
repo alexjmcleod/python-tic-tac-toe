@@ -138,6 +138,3 @@ if new_game == "y":
 	winner = False
 	print("\n" * 3)
 	start_game()
-
-
-				

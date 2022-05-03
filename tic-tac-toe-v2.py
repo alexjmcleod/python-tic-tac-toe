@@ -19,6 +19,7 @@ class Player:
 
     def clear_tiles(self):
         """ Clears the players tiles at the start of a new game """
+        self._tiles = []
 
 # Create players
 player_1 = Player("Player 1", "X")
@@ -57,38 +58,76 @@ def draw_board():
 
 def is_win(player):
     """ Checks whether a players current tiles match any of the winning combinations """
-    if len(player.get_tiles) < 3:
+
+    player_tiles = player.get_tiles()
+    if len(player_tiles) < 3:
         return False # Not a win if the player doesn't have at least 3 tiles
     for combo in winning_combinations:
-        for tile in combo:
-            if tile not in player.get_tiles:
-                return False # Not a win if the player doesn't have all 3 of the tiles in this combo
+        if all(tile in player_tiles for tile in combo):
 
-        # It's a win if the player has all 3 of the tiles from this combo in their tiles
-        # Print winning player box
+            draw_board()
+
+            # It's a win if the player has all 3 of the tiles from this combo in their tiles
+            # Print winning player box
+            frame_x = "-----------------------------------------\n"
+            frame_y = "|                                       |\n"
+            frame_winner = "|            " + player._name + " Wins!             |\n"
+            print(frame_x + frame_y + frame_y + frame_winner + frame_y + frame_y + frame_x)
+
+            global winner
+            winner = True # To stop while loop in player_turns
+            return True # To signal the end of the game has been reached
+
+    if is_draw():
+        winner = True # To stop while loop in player_turns
+        draw_board()
         frame_x = "-----------------------------------------\n"
         frame_y = "|                                       |\n"
-        frame_winner = "|            " + player._name + " Wins!             |\n"
-        print(frame_x + frame_y + frame_y + frame_winner + frame_y + frame_y + frame_x)
-
-        global winner
-        winner = True # To stop while loop in player_turns
-        return True
+        frame_draw = "|             It's a draw!              |\n"
+        print(frame_x + frame_y + frame_y + frame_draw + frame_y + frame_y + frame_x)
+        return True # To signal the end of the game has been reached
 
     return False # Not a win if the player doesn't have any of the winning combos
 
 def player_turn(player):
     """ Starts a turn for the provided player """
+
     draw_board()
-    move = int(input(player._name + ", pick a tile: "))
-    if move not in current_board:
-        print("Please choose a valid tile.")
-        move = int(input(player._name + ", pick a tile: "))
+
+    while True:
+        move = input(player._name + ", pick a tile: ")
+        code = check_valid_input(move)
+        if code == 0:
+            break
+        elif code == 1:
+            print("Please enter a valid integer.")
+        elif code == 2:
+            print("Please enter an integer 1-9.")
+        elif code == 3:
+            print("That tile is already taken. Please choose another tile.")
+
+    move = int(move)
     player.add_tile(move) # Add move to the current players tiles
     current_board[move-1] = player._character # Mark the board with the current players character
     print("\n")
     return is_win(player)
 
+def check_valid_input(move):
+    """ Checks that the input from the user is valid """
+    if not str.isnumeric(move):
+        return 1
+    elif not 0 < int(move) < 10:
+        return 2
+    elif int(move) not in current_board:
+        return 3
+    else:
+        return 0
+
+def is_draw():
+    for tile in current_board:
+        if type(tile) == int:
+            return False
+    return True
 
 def run_game():
     """ Starts a game of tic-tac-toe """
@@ -96,23 +135,26 @@ def run_game():
     print("Player 2's character: O\n")
     while winner == False:
         if player_turn(player_1):
-            return None
+            return new_game()
         else:
-            if player_turn(player_2):
-                return None
+           if player_turn(player_2):
+               return new_game()
+
+def new_game():
+    # At the end of the game, start a new game if the user would like
+    new_game = input("New game? (y/n) ")
+    while new_game != "y" and new_game != "n":
+        new_game = input("New game? (y/n) ")
+
+    if new_game == "y":
+        global current_board
+        current_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        player_1.clear_tiles()
+        player_2.clear_tiles()
+        global winner
+        winner = False
+        print("\n" * 3)
+        return run_game()
+
 
 run_game()
-
-# At the end of the game, start a new game if the user would like
-new_game = input("New game? (y/n) ")
-while new_game != "y" and new_game != "n":
-    new_game = input("New game? (y/n) ")
-
-if new_game == "y":
-    current_board = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    player_1.clear_tiles()
-    player_2.clear_tiles()
-    new_game = ""
-    winner = False
-    print("\n" * 3)
-    run_game()
